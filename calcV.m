@@ -1,10 +1,10 @@
 function [t, res] = calcV(tspan)
-[t, res] = ode45(@(t,y) solveEqs(t,y),tspan,[0.5,0,0.13,0.37,-30,0,0,0,0,0]);
+[t, res] = ode45(@(t,y) solveEqs(t,y),tspan,[0.5,0,0.13,0.37,-30,0,0,0,0,0,2500,2500]);
 end
 
 function results = solveEqs(t,y)
-% 10 differential equations total
-results = zeros(10,1);
+% 12 total differential equations
+results = zeros(12,1);
 C = 0.01;
 
 % Intermediate values
@@ -18,6 +18,8 @@ C2 = y(7);
 O1 = y(8);
 O2 = y(9);
 O3 = y(10);
+Cas = y(11);
+Cad = y(12);
 
 % Delayed rectifying potassium current
 gkv_ = 2.0;
@@ -40,7 +42,6 @@ Ih = gh*(V-Eh);
 
 % Calcium current
 Cao = 2500;
-Cas = 2500; % don't know this value
 gca_ = 1.1;
 AmCa = 12000*(120-V)/(exp((120-V)/25)-1);
 BmCa = 40000/(exp((V+68)/25)+1);
@@ -50,7 +51,6 @@ gCa = gca_*mCa^4*hCa;
 ICa = gCa*(V-ECa);
 
 % Ca-dependent K Current
-Cas = 2500; % don't know this value
 gkc_ = 8.5;
 Ek = -58;
 AmKc = 100*(230-V)/(exp((230-V)/52)-1);
@@ -64,6 +64,14 @@ gl = 0.23;
 El = -21;
 Il = gl*(V-El);
 
+% Constants/parameters for Cas and Cad
+F = 9.649e5;
+Vs = 1.692e-13;
+Vd = 7.356e-13;
+Dca = 6e-8;
+Ssd = 4e-8;
+dsd = 5.9e-5;
+
 % Results
 results(1) = AmKv*(1-mKv)-BmKv*mKv; %mKv
 results(2) = AhKv*(1-hKv)-BhKv*hKv; %hKv
@@ -75,4 +83,6 @@ results(7) = -C1*4*Ah-C2*(3*Ah+Bh)+O1*2*Bh; %C2
 results(8) = C2*3*Ah-O1*(2*Ah+2*Bh)+O2*3*Bh; %O1
 results(9) = O1*2*Ah-O2*(Ah+3*Bh)+O3*4*Bh; %O2
 results(10) = O2*Ah-O3*4*Bh; %O3
+results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad); %Cas || ignoring calcium pump and exchanger for now
+results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad); %Cad
 end
