@@ -1,10 +1,10 @@
-function [t, res] = calcV(tspan)
-    [t, res] = ode45(@(t,y) solveEqs(t,y),tspan,[0.5,0,0.13,0.37,-30,0,0,0,0,0,2500,2500]);
+function [t, res] = calcV(tspan, inj)
+    [t, res] = ode45(@(t,y) solveEqs(t,y,inj),tspan,[0.5,0,0.13,0.37,-30,0,0,0,0,0,2500,2500,0,0,0,0]);
 end
 
-function results = solveEqs(t,y)
+function results = solveEqs(t,y,inj)
     %% Initialization %%
-    results = zeros(12,1);
+    results = zeros(16,1);
     C = 0.01;
     
     % Constants/parameters
@@ -18,8 +18,8 @@ function results = solveEqs(t,y)
     Ca_bhmax = 200;
     Abl = 0.4;
     Bbl = 0.2;
-    Ab = 100;
-    Bbl = 90;
+    Abh = 100;
+    Bbh = 90;
     Jex = 9;
     Jex2 = 9.5;
     Ca_min = 0.05;
@@ -37,6 +37,10 @@ function results = solveEqs(t,y)
     O3 = y(10);
     Cas = y(11);
     Cad = y(12);
+    Ca_bls = y(13);
+    Ca_bhs = y(14);
+    Ca_bld = y(15);
+    Ca_bhd = y(16);
     
     %% CURRENTS %%
     % Delayed rectifying potassium current
@@ -82,22 +86,29 @@ function results = solveEqs(t,y)
     El = -21;
     Il = gl*(V-El);
     
-    %% CALCIUM MECHANISM %%
-    Iex = ((Jex*(Cas-Ca_min))/(Cas-Ca_min+2.3))*exp((V+14)/70);
-    Iex2 = (Jex2*(Cas-Ca_min))/(Cas-Ca_min+0.5);
+    %% CALCIUM PUMP AND EXCHANGER %%
+    Iex = (Jex*(Cas-Ca_min)/(Cas-Ca_min+2.3))*exp(-(V+14)/70);
+    Iex2 = Jex2*(Cas-Ca_min)/(Cas-Ca_min+0.5);
 
-    %% Results %%
+    %% RESULTS %%
     results(1) = AmKv*(1-mKv)-BmKv*mKv; %mKv
     results(2) = AhKv*(1-hKv)-BhKv*hKv; %hKv
     results(3) = AmCa*(1-mCa)-BmCa*mCa; %mCa
     results(4) = AmKc*(1-mKc)-BmKc*mKc; %mKc
-    results(5) = (-(IKv+Ih+ICa+IKCa+Il)+getI(t))/C; %V
+    results(5) = (-(IKv+Ih+ICa+IKCa+Il)+getI(t,inj))/C; %V
     results(6) = -C1*4*Ah+C2*Bh; %C1
     results(7) = -C1*4*Ah-C2*(3*Ah+Bh)+O1*2*Bh; %C2
     results(8) = C2*3*Ah-O1*(2*Ah+2*Bh)+O2*3*Bh; %O1
     results(9) = O1*2*Ah-O2*(Ah+3*Bh)+O3*4*Bh; %O2
     results(10) = O2*Ah-O3*4*Bh; %O3
-%     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad)-(Iex+Iex2)/(2*F*Vs); %Cas
-    results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad); %Cas
-    results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad); %Cad
+%     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad)-(Iex+Iex2)/(2*F*Vs) ...
+%         +Bbl*Ca_bls-Abl*Cas*(Ca_blmax-Ca_bls)+Bbh*Ca_bhs-Abh*Cas*(Ca_bhmax-Ca_bhs); %Cas
+%     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad)-(Iex+Iex2)/(2*F*Vs); %Cas (old eq)
+    results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad); %Cas (old OLD eq)
+%     results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad)+Bbl*Ca_bld-Abl*Cad*(Ca_blmax-Ca_bld)+Bbh*Ca_bhd-Abh*Cad*(Ca_bhmax-Ca_bhd); %Cad
+    results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad); %Cad (old eq)
+%     results(13) = Abl*Cas*(Ca_blmax-Ca_bls)+Bbl*Ca_bls; %Ca_bls
+%     results(14) = Abh*Cas*(Ca_bhmax-Ca_bhs)+Bbh*Ca_bhs; %Ca_bhs
+%     results(15) = Abl*Cad*(Ca_blmax-Ca_bld)+Bbl*Ca_bld; %Ca_bld
+%     results(16) = Abh*Cad*(Ca_bhmax-Ca_bhd)+Bbh*Ca_bhd; %Ca_bhd
 end

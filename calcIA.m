@@ -9,8 +9,8 @@ function [t, IA] = calcIA(tspan, tV, voltage)
         IA(i) = gA(i)*(getV(tV,voltage,t(i))-Ek);
     end
 end
-
-function probabilities = calcProb(t,y, tV, voltage)
+% 
+function probabilities = calcProb(t,y,tV,voltage)
     AmA = @(t) 1200/(exp(-(getV(tV,voltage,t)-50)/28)+1);
     BmA = @(t) 6*exp(-getV(tV,voltage,t)/10);
     AhA = @(t) 0.045*exp(-getV(tV,voltage,t)/13);
