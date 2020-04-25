@@ -1,6 +1,6 @@
-% function [t, res] = calcV(tspan, inj)
-tspan = [0, 0.05];
-inj = 0;
+function [t, res] = calcV(tspan, inj)
+% tspan = [0, 0.005];
+% inj = 0;
 % Initial conditions
 initial_mKv = 0.5; % ADD COMMENTS FOR EACH OF THESE
 initial_hKv = 0;
@@ -15,15 +15,15 @@ initial_O3 = 0;
 initial_Cas = 0.1;
 initial_Cad = 0.2;
 initial_Ca_bls = 0;
-initial_Ca_bhs = 15;
+initial_Ca_bhs = 13;
 initial_Ca_bld = 0;
-initial_Ca_bhd = 15;
+initial_Ca_bhd = 8;
 initial_conditions = [initial_mKv, initial_hKv, initial_mCa, initial_mKc, ...
                       initial_V, initial_C1, initial_C2, initial_O1, ...
                       initial_O2, initial_O3, initial_Cas, initial_Cad, ...
                       initial_Ca_bls, initial_Ca_bhs, initial_Ca_bld, initial_Ca_bhd];
 [t, res] = ode45(@(t,y) solveEqs(t,y,inj),tspan,initial_conditions);
-% end
+end
 
 function results = solveEqs(t,y,inj)
     %% Initialization %%
@@ -124,8 +124,7 @@ function results = solveEqs(t,y,inj)
     results(8) = C2*3*Ah-O1*(2*Ah+2*Bh)+O2*3*Bh; %O1
     results(9) = O1*2*Ah-O2*(Ah+3*Bh)+O3*4*Bh; %O2
     results(10) = O2*Ah-O3*4*Bh; %O3
-%     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad)-(Iex+Iex2)/(2*F*Vs); %Cas (old eq)
-%     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad); %Cas (old OLD eq)
+%     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad); %Cas (old eq)
 %     results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad); %Cad (old eq)
     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad)-(Iex+Iex2)/(2*F*Vs) ...
         +Bbl*Ca_bls-Abl*Cas*(Ca_blmax-Ca_bls)+Bbh*Ca_bhs-Abh*Cas*(Ca_bhmax-Ca_bhs); %Cas
@@ -135,5 +134,5 @@ function results = solveEqs(t,y,inj)
     results(15) = Abl*Cad*(Ca_blmax-Ca_bld)-Bbl*Ca_bld; %Ca_bld
     results(16) = Abh*Cad*(Ca_bhmax-Ca_bhd)-Bbh*Ca_bhd; %Ca_bhd
     
-    disp(t);
+%     disp(t); % Comment this to see t progress. In general, if it moves way too slow, it's probably blowing up.
 end
