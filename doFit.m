@@ -5,7 +5,6 @@ function desiredY = doFit(desiredX, currentY)
     %       desiredX - Array with number of desired elements.
     %   Output:
     %       desiredY - interpolated result of currentY
-    %           ode used.
     %   Assumptions:
     %       size(desiredX) >= currentY.
     
