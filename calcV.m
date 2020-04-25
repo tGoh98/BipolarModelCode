@@ -1,93 +1,98 @@
 function [t, res] = calcV(tspan, inj)
 % tspan = [0, 0.005];
 % inj = 0;
-% Initial conditions
-initial_mKv = 0.5; % ADD COMMENTS FOR EACH OF THESE
-initial_hKv = 0;
-initial_mCa = 0.13;
-initial_mKc = 0.37;
-initial_V = -30;
-initial_C1 = 0;
-initial_C2 = 0;
-initial_O1 = 0;
-initial_O2 = 0;
-initial_O3 = 0;
-initial_Cas = 0.1;
-initial_Cad = 0.2;
-initial_Ca_bls = 0;
-initial_Ca_bhs = 13;
-initial_Ca_bld = 0;
-initial_Ca_bhd = 8;
-initial_conditions = [initial_mKv, initial_hKv, initial_mCa, initial_mKc, ...
-                      initial_V, initial_C1, initial_C2, initial_O1, ...
-                      initial_O2, initial_O3, initial_Cas, initial_Cad, ...
-                      initial_Ca_bls, initial_Ca_bhs, initial_Ca_bld, initial_Ca_bhd];
-[t, res] = ode45(@(t,y) solveEqs(t,y,inj),tspan,initial_conditions);
+    % Initial conditions
+    initial_mKv = 0.5; % ADD COMMENTS FOR EACH OF THESE
+    initial_hKv = 0;
+    initial_mCa = 0.13;
+    initial_mKc = 0.37;
+    initial_V = -30;
+    initial_C1 = 0;
+    initial_C2 = 0;
+    initial_O1 = 0;
+    initial_O2 = 0;
+    initial_O3 = 0;
+    initial_Cas = 0.1;
+    initial_Cad = 0.2;
+    initial_Ca_bls = 0;
+    initial_Ca_bhs = 13;
+    initial_Ca_bld = 0;
+    initial_Ca_bhd = 8;
+    initial_conditions = [initial_mKv, initial_hKv, initial_mCa, initial_mKc, ...
+                          initial_V, initial_C1, initial_C2, initial_O1, ...
+                          initial_O2, initial_O3, initial_Cas, initial_Cad, ...
+                          initial_Ca_bls, initial_Ca_bhs, initial_Ca_bld, initial_Ca_bhd];
+    [t, res] = ode45(@(t,y) solveEqs(t,y,inj),tspan,initial_conditions);
 end
 
 function results = solveEqs(t,y,inj)
     %% Initialization %%
     results = zeros(16,1);
-    C = 0.01; % Capacitance. pF
+    C = 0.01; % Membrane capacitance. pF.
     
     % Constants/parameters
     F = 9.649e5; % Faraday constant per centimole.
-    Dca = 6e-8; % Calcium diffusion coefficient. dm^2 / sec
-    Vs = 1.692e-13; % Volume of the submembrane area. dm^ -3
-    Vd = 7.356e-13; % Volume of the deep intracellular area. dm^-3
-    Ssd = 4e-8; % Surface area of submembrane and the deep intracellular area spherical boundary. dm^-2
-    dsd = 5.9e-5; % Distance between submembrane area and the deep intracellular area. dm
-    Ca_blmax = 400; % Total low affinity buffer concentration. uM
-    Ca_bhmax = 200; % Total high affinity buffer concentration. uM
+    Dca = 6e-8; % Calcium diffusion coefficient. dm^2 / sec.
+    Vs = 1.692e-13; % Volume of the submembrane area. dm^ -3.
+    Vd = 7.356e-13; % Volume of the deep intracellular area. dm^-3.
+    Ssd = 4e-8; % Surface area of submembrane and the deep intracellular area spherical boundary. dm^-2.
+    dsd = 5.9e-5; % Distance between submembrane area and the deep intracellular area. dm.
+    Ca_blmax = 400; % Total low affinity buffer concentration. uM.
+    Ca_bhmax = 200; % Total high affinity buffer concentration. uM.
     Abl = 0.4; % on rate constant for binding of ca to low affinity buffer. per sec per uM.
     Bbl = 0.2; % off rate constant for binding of ca to low affinity buffer. per sec per uM.
     Abh = 100; % on rate constant for binding of ca to high affinity buffer. per sec per uM.
     Bbh = 90; % off rate constant for binding of ca to high affinity buffer. per sec per uM.
-    Jex = 9; % Max current from first calcium exchanger. pA
-    Jex2 = 9.5; % Max current from second calcium exchanger. pA
-    Ca_min = 0.05; % Minimum intracellular calcium concentration for calcium extrusion. uM
-
+    Jex = 9; % Max current from first calcium exchanger. pA.
+    Jex2 = 9.5; % Max current from second calcium exchanger. pA.
+    Ca_min = 0.05; % Minimum intracellular calcium concentration for calcium extrusion. uM.
+    
+    gkv_ = 2.0; % K conductance. nS.
+    Ek = -58; % K reverse potential. mV.
+    gh_ = 0.975; % Hyperpolarization conductance. nS.
+    Eh = -17.7; % Hyperpolarization reverse potential. mV.
+    Cao = 2500; % Extracellular Ca concentration. micromolar.
+    gca_ = 1.1; % Ca conductance. nS.
+    gkc_ = 8.5; % K Ca conductance. nS.
+    Ek = -58; % K reverse potential. mV.
+    gl = 0.23; % Leakage conductance. nS.
+    El = -21; % Leakage reverse potential. mV.
+    
     % Intermediate values
-    mKv = y(1);
-    hKv = y(2);
-    mCa = y(3);
-    mKc = y(4);
-    V = y(5);
-    C1 = y(6);
-    C2 = y(7);
-    O1 = y(8);
-    O2 = y(9);
-    O3 = y(10);
-    Cas = y(11);
-    Cad = y(12);
-    Ca_bls = y(13);
-    Ca_bhs = y(14);
-    Ca_bld = y(15);
-    Ca_bhd = y(16);
+    mKv = y(1); % Probability of m K gate opening.
+    hKv = y(2); % Probability of h K gate opening.
+    mCa = y(3); % Probability of m Ca gate opening.
+    mKc = y(4); % Probability of m Ca-dependent K gate opening.
+    V = y(5); % Membranous voltage. mV.
+    C1 = y(6); % Probability of 1st closed state hyperpoloarization gate.
+    C2 = y(7); % Probability of 2nd closed state hyperpoloarization gate.
+    O1 = y(8); % Probability of 1st open state hyperpoloarization gate.
+    O2 = y(9); % Probability of 2nd open state hyperpoloarization gate.
+    O3 = y(10); % Probability of 3rd open state hyperpoloarization gate.
+    Cas = y(11); % Submembranous calcium concentration. micromolar.
+    Cad = y(12); % Calcium concentration in the central space of the cell. micromolar.
+    Ca_bls = y(13); % Low-affinity calcium buffer concentration for submembranous space. micromolar.
+    Ca_bhs = y(14); % High-affinity calcium buffer concentration for submembranous space. micromolar.
+    Ca_bld = y(15); % Low-affinity calcium buffer concentration for central cell space. micromolar.
+    Ca_bhd = y(16); % High-affinity calcium buffer concentration for central cell space. micromolar.
     
     %% CURRENTS %%
-    % Delayed rectifying potassium current
-    gkv_ = 2.0; % ADD COMMENTS FOR EACH OF THESE
-    Ek = -58;
+    % Delayed rectifying potassium current. pA.
     AmKv = 400/(exp(-(V-15)/36)+1);
     BmKv = exp(-V/13);
     AhKv = 0.0003*exp(-V/7);
     BhKv = 80/(exp(-(V+115)/15)+1)+0.02;
     gKv = gkv_*mKv^3*hKv;
     IKv = gKv*(V-Ek);
-
-    % Hyperpolarization activated current
-    gh_ = 0.975; % ADD COMMENTS FOR EACH OF THESE
-    Eh = -17.7;
+    
+    % Hyperpolarization activated current. pA.
     Ah = 3/(exp((V+110)/15)+1);
     Bh = 1.5/(exp(-(V+115)/15)+1);
     mh = O1+O2+O3;
     gh = gh_*mh;
     Ih = gh*(V-Eh);
 
-    % Calcium current
-    Cao = 2500; % ADD COMMENTS FOR EACH OF THESE
-    gca_ = 1.1;
+    % Calcium current. pA.
     AmCa = 12000*(120-V)/(exp((120-V)/25)-1);
     BmCa = 40000/(exp((V+68)/25)+1);
     ECa = 12.9*log(Cao/Cas);
@@ -95,23 +100,19 @@ function results = solveEqs(t,y,inj)
     gCa = gca_*mCa^4*hCa;
     ICa = gCa*(V-ECa);
 
-    % Ca-dependent K Current
-    gkc_ = 8.5; % ADD COMMENTS FOR EACH OF THESE
-    Ek = -58;
+    % Ca-dependent K Current. pA.
     AmKc = 100*(230-V)/(exp((230-V)/52)-1);
     BmKc = 120*exp(-V/95);
     mKc1 = Cas/(Cas+0.2);
     gKc = gkc_*mKc^2*mKc1;
-    IKCa = gKc*(V-Ek);
+    IKCa = gKc*(V-Ek); 
 
-    % Leakage current
-    gl = 0.23; % ADD COMMENTS FOR EACH OF THESE
-    El = -21;
+    % Leakage current. pA.
     Il = gl*(V-El);
     
     %% CALCIUM PUMP AND EXCHANGER %%
-    Iex = (Jex*(Cas-Ca_min)/(Cas-Ca_min+2.3))*exp(-(V+14)/70); % ADD COMMENTS FOR EACH OF THESE
-    Iex2 = Jex2*(Cas-Ca_min)/(Cas-Ca_min+0.5);
+    Iex = (Jex*(Cas-Ca_min)/(Cas-Ca_min+2.3))*exp(-(V+14)/70); % 1st Ca exchanger pump
+    Iex2 = Jex2*(Cas-Ca_min)/(Cas-Ca_min+0.5); % 2nd Ca exchanger pump
 
     %% RESULTS %%
     results(1) = AmKv*(1-mKv)-BmKv*mKv; %mKv
