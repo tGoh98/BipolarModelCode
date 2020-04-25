@@ -7,7 +7,8 @@ function [t, res] = calcV(tspan, inj)
     %       t - An array containing the time values for each timestep the
     %           ode used.
     %       res - A matrix containing the results of the ode for each
-    %           timestep. Includes intermediate values.
+    %           timestep. Includes intermediate values such as emission
+    %           probabilities and Calcium values.
     %   Assumptions:
     %       None.
 
@@ -128,22 +129,25 @@ function results = solveEqs(t,y,inj)
     results(2) = AhKv*(1-hKv)-BhKv*hKv; %hKv
     results(3) = AmCa*(1-mCa)-BmCa*mCa; %mCa
     results(4) = AmKc*(1-mKc)-BmKc*mKc; %mKc
-    results(5) = (-(IKv+Ih+ICa+IKCa+Il)+getI(t,inj))/C; %V
+    results(5) = (-(IKv+Ih+ICa+IKCa+Il)+getI(t,inj))/C; %V 
     results(6) = -C1*4*Ah+C2*Bh; %C1
     results(7) = -C1*4*Ah-C2*(3*Ah+Bh)+O1*2*Bh; %C2
     results(8) = C2*3*Ah-O1*(2*Ah+2*Bh)+O2*3*Bh; %O1
     results(9) = O1*2*Ah-O2*(Ah+3*Bh)+O3*4*Bh; %O2
     results(10) = O2*Ah-O3*4*Bh; %O3
-%     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad); %Cas (old eq)
-%     results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad); %Cad (old eq)
-    results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad)-(Iex+Iex2)/(2*F*Vs) ...
-        +Bbl*Ca_bls-Abl*Cas*(Ca_blmax-Ca_bls)+Bbh*Ca_bhs-Abh*Cas*(Ca_bhmax-Ca_bhs); %Cas
-    results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad)+Bbl*Ca_bld-Abl*Cad*(Ca_blmax-Ca_bld) ...
-        +Bbh*Ca_bhd-Abh*Cad*(Ca_bhmax-Ca_bhd); %Cad
-    results(13) = Abl*Cas*(Ca_blmax-Ca_bls)-Bbl*Ca_bls; %Ca_bls
-    results(14) = Abh*Cas*(Ca_bhmax-Ca_bhs)-Bbh*Ca_bhs; %Ca_bhs
-    results(15) = Abl*Cad*(Ca_blmax-Ca_bld)-Bbl*Ca_bld; %Ca_bld
-    results(16) = Abh*Cad*(Ca_bhmax-Ca_bhd)-Bbh*Ca_bhd; %Ca_bhd
     
-%     disp(t); % Comment this to see t progress. In general, if it moves way too slow, it's probably blowing up.
+    results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad); %Cas (no calcium mechanism)
+    results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad); %Cad (no calcium mechanism)
+    
+    % UNCOMMENT THESE TO USE CALCIUM MECHANISM
+%     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad)-(Iex+Iex2)/(2*F*Vs) ...
+%         +Bbl*Ca_bls-Abl*Cas*(Ca_blmax-Ca_bls)+Bbh*Ca_bhs-Abh*Cas*(Ca_bhmax-Ca_bhs); %Cas
+%     results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad)+Bbl*Ca_bld-Abl*Cad*(Ca_blmax-Ca_bld) ...
+%         +Bbh*Ca_bhd-Abh*Cad*(Ca_bhmax-Ca_bhd); %Cad
+%     results(13) = Abl*Cas*(Ca_blmax-Ca_bls)-Bbl*Ca_bls; %Ca_bls
+%     results(14) = Abh*Cas*(Ca_bhmax-Ca_bhs)-Bbh*Ca_bhs; %Ca_bhs
+%     results(15) = Abl*Cad*(Ca_blmax-Ca_bld)-Bbl*Ca_bld; %Ca_bld
+%     results(16) = Abh*Cad*(Ca_bhmax-Ca_bhd)-Bbh*Ca_bhd; %Ca_bhd
+    
+%     disp(t); % Uncomment this to see t progress. In general, if it moves way too slow, it's probably blowing up.
 end
