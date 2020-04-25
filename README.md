@@ -3,9 +3,9 @@ Computational model of Bipolar Cells in Lower Vertebrate Retina. Done for BIOE 4
 
 ## Files Explained
 * ionic_model.mlx
-    - Matlab Live Script that computes and plots the voltage and currents.
+    - Matlab Live Script that computes and plots the voltage and currents. Currently plots currents without considering calcium pump and exchanger.
 * calcV.m
-    - Computes the voltage membranous voltage.
+    - Computes the voltage membranous voltage. Commented out calcium pump and exchanger for now.
     - Input:
       - tspan - The time span (s).
       - inj - The amount of current to inject for getI() (pA).
