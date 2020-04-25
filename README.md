@@ -20,6 +20,13 @@ Computational model of Bipolar Cells in Lower Vertebrate Retina. Done for BIOE 4
       - V - Array containing the voltage values for each timestep (mV).
     - Output:
       - An array containing the respective current for each timestep (pA).
+* doFit.m
+    - Helper function that uses interpolation to resize a vector to match another vector.
+    - Input:
+        - currentY - Array of values.
+        - desiredX - Array with number of desired elements.
+    - Output:
+        - desiredY - interpolated result of currentY
 
 ## Documentation and Comments
 In the Matlab console, type ```help [function name]``` to see the documentation for any function.
