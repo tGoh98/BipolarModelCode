@@ -1,8 +1,18 @@
 function [t, res] = calcV(tspan, inj)
-% tspan = [0, 0.005];
-% inj = 0;
-    % Initial conditions
-    initial_mKv = 0.5; % ADD COMMENTS FOR EACH OF THESE
+    % calcV Calculates the membranous voltage.
+    %   Input:
+    %       tspan - The time span (s).
+    %       inj - The amount of current to inject for getI() (pA).
+    %   Output:
+    %       t - An array containing the time values for each timestep the
+    %           ode used.
+    %       res - A matrix containing the results of the ode for each
+    %           timestep. Includes intermediate values.
+    %   Assumptions:
+    %       None.
+
+    % Initial conditions (see below for description and units)
+    initial_mKv = 0.5; 
     initial_hKv = 0;
     initial_mCa = 0.13;
     initial_mKc = 0.37;
@@ -54,7 +64,6 @@ function results = solveEqs(t,y,inj)
     Cao = 2500; % Extracellular Ca concentration. micromolar.
     gca_ = 1.1; % Ca conductance. nS.
     gkc_ = 8.5; % K Ca conductance. nS.
-    Ek = -58; % K reverse potential. mV.
     gl = 0.23; % Leakage conductance. nS.
     El = -21; % Leakage reverse potential. mV.
     
@@ -129,7 +138,8 @@ function results = solveEqs(t,y,inj)
 %     results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad); %Cad (old eq)
     results(11) = -ICa/(2*F*Vs)-((Dca*Ssd)/(Vs*dsd))*(Cas-Cad)-(Iex+Iex2)/(2*F*Vs) ...
         +Bbl*Ca_bls-Abl*Cas*(Ca_blmax-Ca_bls)+Bbh*Ca_bhs-Abh*Cas*(Ca_bhmax-Ca_bhs); %Cas
-    results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad)+Bbl*Ca_bld-Abl*Cad*(Ca_blmax-Ca_bld)+Bbh*Ca_bhd-Abh*Cad*(Ca_bhmax-Ca_bhd); %Cad
+    results(12) = ((Dca*Ssd)/(Vd*dsd))*(Cas-Cad)+Bbl*Ca_bld-Abl*Cad*(Ca_blmax-Ca_bld) ...
+        +Bbh*Ca_bhd-Abh*Cad*(Ca_bhmax-Ca_bhd); %Cad
     results(13) = Abl*Cas*(Ca_blmax-Ca_bls)-Bbl*Ca_bls; %Ca_bls
     results(14) = Abh*Cas*(Ca_bhmax-Ca_bhs)-Bbh*Ca_bhs; %Ca_bhs
     results(15) = Abl*Cad*(Ca_blmax-Ca_bld)-Bbl*Ca_bld; %Ca_bld
