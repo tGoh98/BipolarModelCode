@@ -11,7 +11,7 @@ Computational model of Bipolar Cells in Lower Vertebrate Retina. Done for BIOE 4
       - inj - The amount of current to inject for getI() (pA).
     - Output:
       - t - An array containing the time values for each timestep the ode used.
-      - res - A matrix containing the results of the ode for each timestep. Includes intermediate values.
+      - res - A matrix containing the results of the ode for each timestep. Includes intermediate values such as emission  probabilities and Calcium values.
 * calcIXY.m
     - Computes the voltage for the respective current.
     - Input:
