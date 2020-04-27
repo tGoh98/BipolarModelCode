@@ -34,4 +34,4 @@ Constants and parameters are commented with a description and units.
 
 ## References
 Equations used were based on: 
-ADD CITATION HERE
+Usui, S., Ishihaiza, A., Kamiyama, Y., & Ishii, H. (1996). Ionic current model of bipolar cells in the lower vertebrate retina. Vision Research, 36(24), 4069–4076. https://doi.org/10.1016/S0042-6989(96)00179-4
